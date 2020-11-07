@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Danh Sach San Pham</h2>
+        <a class="btn btn-danger" style="float: right; margin-right: 30px;" id="delete">Xoa</a>
+        <table class="table table-hover">
+            <thead class="thead-light">
+                <tr>
+
+                    <th>Ma San Pham</th>
+                    <th>Ten San Pham</th>
+                    <th>So Luong</th>
+                   
+                    <th>Xoa</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                <% _.forEach(data.Items, function(value) { %>
+                <tr>
+                    <td><%= value.maSp %></td>
+                    <td><%= value.tenSp %></td>
+                    <td><%= value.soLuong %></td>
+                    <td>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="check"
+                                onclick="addSP('<%= value.maSp %>')">
+                        </div>
+                    </td>
+                   
+                </tr>
+                <% }) %>
+
+
+            </tbody>
+        </table>
+        
+
+    </div>
+</body>
+<script>
+    var arr = [];
+    function addSP(id) {
+        arr.push(id);
+        arr = [...new Set(arr)];
+        console.log(arr);
+        document.getElementById("delete").setAttribute('href', `/sanpham/delete/${arr}`);
+    };   
+</script>
+
+
+</html>
