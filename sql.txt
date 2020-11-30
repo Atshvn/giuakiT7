@@ -254,3 +254,44 @@ public class MainActivity extends AppCompatActivity {
 
     }
 }
+
+-----
+
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/label"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent"
+    android:padding="10dip"
+    android:textSize="16dip"
+    android:textStyle="bold" >
+</TextView>
+
+----
+
+private void openInfoDialog() {
+        new AlertDialog.Builder(getActivity())
+                .setTitle("Trợ giúp")
+                .setMessage("Chào mừng bạn đến với trình quản lý điểm Atsh! Ở đây, ban có thế " +
+                        "thấy danh sách và điểm của tất cả các học sinh." +
+                        "\n\n-Chọn một học sinh trong danh sách để thêm hoặc chỉnh sửa điểm" +
+                        "hoặc có thể xóa học sinh ra khỏi danh sách." +
+                        "\n\n-Chọn 'Add Student' để thêm học sinh mới" +
+                        "\n\n-Chọn 'Summary' để xem điểm trung bình của cả lớp " +
+                        ".")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                })
+  .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // TODO Auto-generated method stub
+                        Toast.makeText(getBaseContext(), "cancel ' comment same as ok'", Toast.LENGTH_SHORT).show();
+
+
+                }
+            });
+                .show();
+    }
