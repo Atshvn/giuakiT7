@@ -1,0 +1,256 @@
+
+public class Databasehelper extends SQLiteOpenHelper {
+    public Databasehelper(@Nullable Context context) {
+        super(context, "db.sqlite", null, 1);
+    }
+    public static final String INSERT_SAMPLE_STUDENTS =
+            "INSERT INTO LinhKien ("+"maLK"+","+"tenLK"+","+"SL"+","+"gia"+","+"quocGia"+","+"loaiHang"+") VALUES "
+                    + "(170524111,'IPHONE', 3, 1300, 'Viet Nam', 'loai 1'),"
+                    + "(17052411,'IPHONE', 3, 1300, 'Viet Nam', 'loai 1');";
+
+    @Override
+    public void onCreate(SQLiteDatabase sqLiteDatabase) {
+        sqLiteDatabase.execSQL("CREATE TABLE LinhKien("+"maLK integer primary key not null," +
+                "tenLK text,"+" SL integer,"+"gia long,"+"quocGia text,"+"loaiHang text)");
+        sqLiteDatabase.execSQL(INSERT_SAMPLE_STUDENTS);
+
+    }
+
+
+    @Override
+    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS LinhKien");
+        onCreate(sqLiteDatabase);
+
+    }
+    public int insetLinhKien(LinhKienModal linhKienModal){
+        SQLiteDatabase db= this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("maLK", linhKienModal.getMaLK());
+        contentValues.put("tenLK", linhKienModal.getTenLK());
+        contentValues.put("SL", linhKienModal.getSL());
+        contentValues.put("gia", linhKienModal.getGia());
+        contentValues.put("quocGia", linhKienModal.getQuocGia());
+        contentValues.put("loaiHang", linhKienModal.getLoaiHang());
+        int result = (int)db.insert("LinhKien", null, contentValues);
+        db.close();
+        return result;
+    }
+    public ArrayList<LinhKienModal> getAllLinhKien(){
+        ArrayList<LinhKienModal> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("select * from LinhKien", null);
+        if(cursor != null){
+            cursor.moveToFirst();
+        }
+        while (cursor.isAfterLast()==false){
+            list.add( new LinhKienModal(cursor.getInt(0), cursor.getString(1), cursor.getInt(2), cursor.getInt(3), cursor.getString(4), cursor.getString(5)));
+            cursor.moveToNext();
+        }
+        cursor.close();
+        db.close();
+        return list;
+    };
+    public ArrayList<LinhKienModal> getIdLinhKien(int id){
+        ArrayList<LinhKienModal> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("select * from LinhKien where maLK " + id, null);
+        if(cursor != null){
+            cursor.moveToFirst();
+        }
+        LinhKienModal linhKienModal = new LinhKienModal(cursor.getInt(0), cursor.getString(1), cursor.getInt(2), cursor.getInt(3), cursor.getString(4), cursor.getString(5));
+        list.add(linhKienModal);
+        cursor.close();
+        db.close();
+        return list;
+    }
+    public int updatelinhKien(LinhKienModal linhKienModal) {
+
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("maLK", linhKienModal.getMaLK());
+        contentValues.put("tenLK", linhKienModal.getTenLK());
+        contentValues.put("SL", linhKienModal.getSL());
+        contentValues.put("gia", linhKienModal.getGia());
+        contentValues.put("quocGia", linhKienModal.getQuocGia());
+        contentValues.put("loaiHang", linhKienModal.getLoaiHang());
+
+        // updating row
+        return db.update("LinhKien", contentValues, "maLK" + " = ?",
+                new String[]{String.valueOf(linhKienModal.getMaLK())});
+    }
+
+    public void deleteLinhKien(LinhKienModal linhKienModal) {
+       // Log.i(TAG, "MyDatabaseHelper.updateNote ... " + note.getNoteTitle() );
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete("LinhKien", "maLK" + " = ?",
+                new String[]{String.valueOf(linhKienModal.getMaLK())});
+        db.close();
+    }
+-------
+
+public class MainActivity extends AppCompatActivity {
+    EditText ed_name, ed_ma, ed_SL, ed_gia;
+    Spinner spinner;
+    RadioButton rd_selected, rd_loai1, rd_loai2;
+    ListView listView;
+    private RadioGroup radioGroup;
+    Button btnThem, btnCapNhat , btnXoa;
+    private String[] quocGia= new String[] {"VietNam","Han Quoc","Nhat Ban"};
+    ArrayList<LinhKienModal> linhKienModalsList;
+    private ArrayAdapter<String> listViewAdapter;
+    Databasehelper dbAdapter = new Databasehelper(this);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        ed_name =(EditText)findViewById(R.id.ed_tenLK);
+        ed_ma =(EditText)findViewById(R.id.ed_maLK);
+        ed_SL =(EditText)findViewById(R.id.ed_SL);
+        ed_gia =(EditText)findViewById(R.id.ed_gia);
+        spinner =(Spinner) findViewById(R.id.spinner);
+        listView =(ListView)findViewById(R.id.lvLinhKien);
+        btnThem =(Button)findViewById(R.id.btnthem);
+        btnCapNhat =(Button)findViewById(R.id.btncapnhat);
+        btnXoa =(Button)findViewById(R.id.btnxoa);
+        radioGroup=(RadioGroup)findViewById(R.id.radio);
+        rd_selected=(RadioButton)findViewById(radioGroup.getCheckedRadioButtonId());
+        rd_loai1=(RadioButton)findViewById(R.id.radio_loai1);
+        rd_loai2=(RadioButton)findViewById(R.id.radio_loai2);
+
+        ArrayAdapter<String> adapterQuocGia = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, quocGia);
+        adapterQuocGia.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapterQuocGia);
+
+
+    initList();
+        btnThem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+             addLinhKien();
+
+            }
+        });
+        btnXoa.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                deleteLinhKien();
+
+            }
+        });
+        btnCapNhat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                updateLinhKien();
+
+            }
+        });
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                LinhKienModal linhKienModal = linhKienModalsList.get(position);
+                ed_ma.setText(linhKienModal.getMaLK()+"");
+                ed_name.setText(linhKienModal.getTenLK());
+                ed_SL.setText(linhKienModal.getSL()+"");
+                ed_gia.setText(linhKienModal.getGia()+"");
+                spinner.setSelection(((ArrayAdapter)spinner.getAdapter()).getPosition(linhKienModal.getQuocGia()));
+                if(linhKienModal.getLoaiHang().equals("Loai1")){
+                    rd_loai1.setChecked(true);
+                    rd_loai2.setChecked(false);
+                }
+                else{
+                    rd_loai2.setChecked(true);
+                    rd_loai1.setChecked(false);
+                }
+
+            }
+        });
+    }
+    public void addLinhKien(){
+
+        String maLK = ed_ma.getText().toString();
+        String tenLK = ed_name.getText().toString();
+        String SL = ed_SL.getText().toString();
+        String gia = ed_gia.getText().toString();
+        String quocGia =spinner.getSelectedItem().toString();
+        String loai = rd_selected.getText().toString();
+        if(TextUtils.isEmpty(maLK) || TextUtils.isEmpty(tenLK) || TextUtils.isEmpty(SL)|| TextUtils.isEmpty(gia)){
+            Toast.makeText(this, "Hay nhap day du thong tin", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        LinhKienModal linhKienModal = new LinhKienModal(Integer.parseInt(maLK), tenLK,Integer.parseInt(SL),Integer.parseInt(gia),quocGia,loai);
+        if( dbAdapter.insetLinhKien(linhKienModal)>0)
+        {
+            initList();
+            Toast.makeText(MainActivity.this, "Them Thanh Cong", Toast.LENGTH_SHORT).show();
+        }
+        else
+            Toast.makeText(MainActivity.this,"Ma trung",Toast.LENGTH_SHORT).show();
+
+
+    }
+    public void deleteLinhKien(){
+        String maLK = ed_ma.getText().toString();
+        String tenLK = ed_name.getText().toString();
+        String SL = ed_SL.getText().toString();
+        String gia = ed_gia.getText().toString();
+        String loai =spinner.getSelectedItem().toString();
+        String quocGia = rd_selected.getText().toString();
+        LinhKienModal linhKienModal = new LinhKienModal(Integer.parseInt(maLK), tenLK,Integer.parseInt(SL),Integer.parseInt(gia),loai,quocGia);
+        dbAdapter.deleteLinhKien(linhKienModal);
+        initList();
+        Toast.makeText(MainActivity.this, "Xoa Thanh Cong", Toast.LENGTH_SHORT).show();
+    }
+    public void updateLinhKien(){
+        String maLK = ed_ma.getText().toString();
+        String tenLK = ed_name.getText().toString();
+        String SL = ed_SL.getText().toString();
+        String gia = ed_gia.getText().toString();
+        String loai =spinner.getSelectedItem().toString();
+        String quocGia = rd_selected.getText().toString();
+        LinhKienModal linhKienModal = new LinhKienModal(Integer.parseInt(maLK), tenLK,Integer.parseInt(SL),Integer.parseInt(gia),loai,quocGia);
+        dbAdapter.updatelinhKien(linhKienModal);
+        initList();
+        Toast.makeText(MainActivity.this, "Cap Nhat Thanh Cong", Toast.LENGTH_SHORT).show();
+    }
+    public void initList(){
+        Databasehelper db = new Databasehelper(this);
+        final List<LinhKienModal> list=  db.getAllLinhKien();
+        final ArrayList<String> LinhKienlist = new ArrayList<String>();
+        linhKienModalsList=dbAdapter.getAllLinhKien();
+        for(LinhKienModal linhKienModal : linhKienModalsList)
+        {
+            String users = linhKienModal.getMaLK()+"     -     "+linhKienModal.getTenLK();
+
+            LinhKienlist.add(users);
+            Log.d("users: ", users);
+
+        }
+
+        listViewAdapter = new ArrayAdapter<String>(this, R.layout.item_layout, R.id.label, LinhKienlist);
+        listView.setAdapter( listViewAdapter );
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.logout:
+                // write your code here
+               finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+    }
+}
