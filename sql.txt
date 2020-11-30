@@ -295,3 +295,20 @@ private void openInfoDialog() {
             });
                 .show();
     }
+
+----------------
+
+lvSinhVien = (ListView)findViewById(R.id.lvSinhVien);
+        adapter =  new ArrayAdapter<Sinhvien>(this, 0, SinhvienList){
+
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+                convertView = inflater.inflate(R.layout.item_layout, null);
+                TextView tvmsv = convertView.findViewById(R.id.tv_msv);
+                TextView tvName = convertView.findViewById(R.id.tv_name);
+                Sinhvien s =SinhvienList.get(position);
+                tvmsv.setText(s.getMssv());
+                tvName.setText(s.getName());
+
+                return convertView;
+            }
